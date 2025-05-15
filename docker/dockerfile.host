@@ -1,0 +1,10 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY hosts/ /app/
+COPY ping.py /app/ping.py
+COPY start_udp_server.py /app/start_udp_server.py
+
+
+CMD ["python", "servidor.py"]
