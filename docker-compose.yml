@@ -1,0 +1,230 @@
+version: "3.8"
+
+services:
+  # Roteadores
+  r1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.roteador
+    container_name: r1
+    environment:
+      - ROTEADOR_ID=R1
+    networks:
+      subrede1:
+        ipv4_address: 10.1.0.2
+      interconexao:
+        ipv4_address: 172.50.0.2
+    cap_add:
+      - NET_ADMIN
+
+  r2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.roteador
+    container_name: r2
+    environment:
+      - ROTEADOR_ID=R2
+    networks:
+      subrede2:
+        ipv4_address: 10.2.0.2
+      interconexao:
+        ipv4_address: 172.50.0.3
+    cap_add:
+      - NET_ADMIN
+
+  r3:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.roteador
+    container_name: r3
+    environment:
+      - ROTEADOR_ID=R3
+    networks:
+      subrede3:
+        ipv4_address: 10.3.0.2
+      interconexao:
+        ipv4_address: 172.50.0.4
+    cap_add:
+      - NET_ADMIN
+
+  r4:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.roteador
+    container_name: r4
+    environment:
+      - ROTEADOR_ID=R4
+    networks:
+      subrede4:
+        ipv4_address: 10.4.0.2
+      interconexao:
+        ipv4_address: 172.50.0.5
+    cap_add:
+      - NET_ADMIN
+
+  r5:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.roteador
+    container_name: r5
+    environment:
+      - ROTEADOR_ID=R5
+    networks:
+      subrede5:
+        ipv4_address: 10.5.0.2
+      interconexao:
+        ipv4_address: 172.50.0.6
+    cap_add:
+      - NET_ADMIN
+
+  # Hosts da subrede 1
+  h1a:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h1a
+    networks:
+      subrede1:
+        ipv4_address: 10.1.0.3
+    depends_on:
+      - r1
+
+  h1b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h1b
+    networks:
+      subrede1:
+        ipv4_address: 10.1.0.4
+    depends_on:
+      - r1
+
+  # Hosts da subrede 2
+  h2a:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h2a
+    networks:
+      subrede2:
+        ipv4_address: 10.2.0.3
+    depends_on:
+      - r2
+
+  h2b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h2b
+    networks:
+      subrede2:
+        ipv4_address: 10.2.0.4
+    depends_on:
+      - r2
+
+  # Hosts da subrede 3
+  h3a:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h3a
+    networks:
+      subrede3:
+        ipv4_address: 10.3.0.3
+    depends_on:
+      - r3
+
+  h3b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h3b
+    networks:
+      subrede3:
+        ipv4_address: 10.3.0.4
+    depends_on:
+      - r3
+
+  # Hosts da subrede 4
+  h4a:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h4a
+    networks:
+      subrede4:
+        ipv4_address: 10.4.0.3
+    depends_on:
+      - r4
+
+  h4b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h4b
+    networks:
+      subrede4:
+        ipv4_address: 10.4.0.4
+    depends_on:
+      - r4
+
+  # Hosts da subrede 5
+  h5a:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h5a
+    networks:
+      subrede5:
+        ipv4_address: 10.5.0.3
+    depends_on:
+      - r5
+
+  h5b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: h5b
+    networks:
+      subrede5:
+        ipv4_address: 10.5.0.4
+    depends_on:
+      - r5
+
+networks:
+  interconexao:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.50.0.0/24
+
+  subrede1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.1.0.0/24
+
+  subrede2:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.2.0.0/24
+
+  subrede3:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.3.0.0/24
+
+  subrede4:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.4.0.0/24
+
+  subrede5:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/24
