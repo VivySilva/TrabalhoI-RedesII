@@ -29,6 +29,8 @@ services:
         ipv4_address: 10.2.0.2
       interconexao:
         ipv4_address: 172.50.0.3
+    depends_on:
+      - r1
     cap_add:
       - NET_ADMIN
 
@@ -44,6 +46,8 @@ services:
         ipv4_address: 10.3.0.2
       interconexao:
         ipv4_address: 172.50.0.4
+    depends_on:
+      - r2
     cap_add:
       - NET_ADMIN
 
@@ -59,6 +63,8 @@ services:
         ipv4_address: 10.4.0.2
       interconexao:
         ipv4_address: 172.50.0.5
+    depends_on:
+      - r3
     cap_add:
       - NET_ADMIN
 
@@ -74,6 +80,8 @@ services:
         ipv4_address: 10.5.0.2
       interconexao:
         ipv4_address: 172.50.0.6
+    depends_on:
+      - r4
     cap_add:
       - NET_ADMIN
 
@@ -88,6 +96,8 @@ services:
         ipv4_address: 10.1.0.3
     depends_on:
       - r1
+    cap_add:
+      - NET_ADMIN
 
   h1b:
     build:
@@ -99,6 +109,8 @@ services:
         ipv4_address: 10.1.0.4
     depends_on:
       - r1
+    cap_add:
+      - NET_ADMIN
 
   # Hosts da subrede 2
   h2a:
@@ -111,6 +123,8 @@ services:
         ipv4_address: 10.2.0.3
     depends_on:
       - r2
+    cap_add:
+      - NET_ADMIN
 
   h2b:
     build:
@@ -122,6 +136,8 @@ services:
         ipv4_address: 10.2.0.4
     depends_on:
       - r2
+    cap_add:
+      - NET_ADMIN
 
   # Hosts da subrede 3
   h3a:
@@ -134,6 +150,8 @@ services:
         ipv4_address: 10.3.0.3
     depends_on:
       - r3
+    cap_add:
+      - NET_ADMIN
 
   h3b:
     build:
@@ -145,6 +163,8 @@ services:
         ipv4_address: 10.3.0.4
     depends_on:
       - r3
+    cap_add:
+      - NET_ADMIN
 
   # Hosts da subrede 4
   h4a:
@@ -157,6 +177,8 @@ services:
         ipv4_address: 10.4.0.3
     depends_on:
       - r4
+    cap_add:
+      - NET_ADMIN
 
   h4b:
     build:
@@ -168,6 +190,8 @@ services:
         ipv4_address: 10.4.0.4
     depends_on:
       - r4
+    cap_add:
+      - NET_ADMIN
 
   # Hosts da subrede 5
   h5a:
@@ -180,6 +204,8 @@ services:
         ipv4_address: 10.5.0.3
     depends_on:
       - r5
+    cap_add:
+      - NET_ADMIN
 
   h5b:
     build:
@@ -191,6 +217,8 @@ services:
         ipv4_address: 10.5.0.4
     depends_on:
       - r5
+    cap_add:
+      - NET_ADMIN
 
 networks:
   interconexao:
