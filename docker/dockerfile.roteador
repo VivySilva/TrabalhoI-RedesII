@@ -1,10 +1,14 @@
+# docker/Dockerfile.roteador
 FROM python:3.10-slim
 
-RUN apt-get update && apt-get install -y iproute2 iputils-ping && apt-get clean
+RUN apt-get update && apt-get install -y iproute2 iputils-ping
 
 WORKDIR /app
 
+# Copia código Python e configs
 COPY routers/ /app/
 COPY configs/ /app/configs/
 
-CMD ["python", "roteador.py"]
+EXPOSE 5000
+
+CMD ["python", "-u", "router.py"]
