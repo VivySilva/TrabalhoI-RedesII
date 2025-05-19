@@ -162,11 +162,29 @@ class Router:
                     self.envia_lsa_para_todos()
 
             elif tipo == "LSA":
-                print(f"[{self.router_id}] [LSA] recebido de {remetente}")
-                if self.lsdb.update(remetente, vizinhos):
-                    print(f"[{self.router_id}] LSDB atualizada com {remetente}")
-                    self.envia_lsa_para_todos()
+                print(
+                    f"[{self.router_id}] [LSA] recebido de {remetente}", flush=True)
 
+                # Atualiza LSDB e salva se houve mudança
+                mudou = self.lsdb.update(remetente, vizinhos)
+
+                # Repassa LSA para todos os vizinhos (menos o remetente)
+                for viz_id, (ip, porta, _) in self.vizinhos.items():
+                    if viz_id == remetente:
+                        continue
+                    try:
+                        self.packet_manager.send(ip, porta, json.dumps(pacote))
+                        print(
+                            f"[{self.router_id}] [LSA] REPASSADO para {viz_id}", flush=True)
+                    except Exception as e:
+                        print(
+                            f"[{self.router_id}] Erro ao reenviar LSA para {viz_id}: {e}", flush=True)
+
+                if mudou:
+                    print(
+                        f"[{self.router_id}] LSDB atualizada com {remetente}", flush=True)
+
+            # Atualiza as rotas baseadas na LSDB
             else:
                 print(f"[{self.router_id}] Pacote desconhecido: {tipo}")
                 continue
