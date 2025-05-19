@@ -1,9 +1,17 @@
 #!/bin/bash
 
 declare -A ip_para_container
-hosts=()
+declare -A origem_tempos
+declare -A origem_sucessos
+declare -A origem_total
 
-# Leitura do docker-compose.yml
+hosts=()
+success=0
+fail=0
+total_time=0
+total_success=0
+
+# Lê o docker-compose.yml
 container=""
 while read -r line; do
   if [[ $line == *"container_name:"* ]]; then
@@ -17,43 +25,58 @@ while read -r line; do
   fi
 done < docker-compose.yml
 
-# Gera lista de IPs dos hosts
 ips=()
 for ip in "${!ip_para_container[@]}"; do
   container="${ip_para_container[$ip]}"
-  if [[ " ${hosts[@]} " =~ " ${container} " ]]; then
+  if [[ " ${hosts[*]} " =~ " $container " ]]; then
     ips+=("$ip")
   fi
 done
 
-success=0
-fail=0
+# CSV
+echo "origem,destino,destino_ip,duracao,status" > resultados_hosts.csv
 
-echo "=========================================="
-echo "Teste de conectividade ICMP entre os hosts:"
-echo "=========================================="
+echo "====================================="
+echo "Teste de conectividade entre os hosts"
+echo "====================================="
 
-# Loop de testes de ping
 for origem in "${hosts[@]}"; do
-  echo -e "\n### Pings a partir de $origem ###"
+  echo -e "\n---- Pings a partir de $origem ----"
   for destino_ip in "${ips[@]}"; do
     destino="${ip_para_container[$destino_ip]}"
     [[ "$origem" == "$destino" ]] && continue
-    printf "Pingando %-15s (%-8s)... " "$destino_ip" "$destino"
+
+    start=$(date +%s.%N)
     if docker exec "$origem" ping -c 1 -W 1 "$destino_ip" &> /dev/null; then
-      echo "✔️"
+      end=$(date +%s.%N)
+      duracao=$(awk "BEGIN {print $end - $start}")
+      status="1"
       ((success++))
+      ((total_success++))
     else
-      echo "❌"
+      end=$(date +%s.%N)
+      duracao=$(awk "BEGIN {print $end - $start}")
+      status="0"
       ((fail++))
     fi
+
+    total_time=$(awk "BEGIN {print $total_time + $duracao}")
+    echo "-> $destino (${destino_ip}): ${duracao}s [$status]"
+
+    origem_tempos[$origem]=$(awk "BEGIN {print ${origem_tempos[$origem]:-0} + $duracao}")
+    origem_sucessos[$origem]=$(( ${origem_sucessos[$origem]:-0} + 1 ))
+    origem_total[$origem]=$(( ${origem_total[$origem]:-0} + 1 ))
   done
 done
 
 # Resumo
 total=$((success + fail))
-echo -e "\nResumo (Hosts):"
+taxa_sucesso=$(awk "BEGIN {printf \"%.2f\", ($success / $total) * 100}")
+taxa_falha=$(awk "BEGIN {printf \"%.2f\", ($fail / $total) * 100}")
+media_global=$(awk "BEGIN {printf \"%.4f\", $total_time / $total}")
+
+echo -e "\n---- Resumo Geral ----"
 echo "Total de testes: $total"
-echo "Sucesso: $success"
-echo "Falha: $fail"
-[[ $total -gt 0 ]] && echo "Perda: $((100 * fail / total))%" || echo "Perda: N/A"
+echo "Sucesso: $success | Percentual: $taxa_sucesso%"
+echo "Falha: $fail | Percentual: $taxa_falha%"
+echo "Média global de tempo: ${media_global}s"
