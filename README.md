@@ -12,6 +12,12 @@ Simular uma rede com roteadores e hosts utilizando contêiners Docker. Cada rote
 * Calcular rotas com o algoritmo de Dijkstra;
 * Configurar rotas com base nas rotas mais curtas calculadas.
 
+## Justificativa dos Protocolos Utilizados
+
+O projeto implementa o protocolo de **Roteamento por Estado de Enlace (Link-State Routing - LSR)** para disseminação de informações da topologia da rede e cálculo das rotas mais curtas entre os nós. Essa abordagem foi escolhida por sua capacidade de fornecer uma visão global da rede a cada roteador, o que resulta em melhores decisões de roteamento, menor tempo de convergência e prevenção de loops — características também encontradas em protocolos reais como o OSPF.
+
+Para a comunicação entre os roteadores, foi utilizado o **protocolo UDP (User Datagram Protocol)**, da camada de transporte. O UDP é leve, sem conexão e adequado para troca frequente de mensagens de controle como HELLO e LSA, tornando-o ideal para esse tipo de simulação.
+
 ## Estrutura do Projeto
 
 ```bash
