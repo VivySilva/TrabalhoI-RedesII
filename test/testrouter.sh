@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# Cria um vetor associativo ip -> container
 declare -A ip_para_container
 declare -A roteadores_map
 roteadores=()
 
 success=0
 fail=0
+total_time=0
 
-# Leitura do docker-compose para identificar os roteadores
+# Leitura do docker-compose para mapear roteadores
+container=""
 while read -r line; do
   if [[ $line == *"container_name:"* ]]; then
     container=$(echo $line | awk '{print $2}')
-  fi
-  if [[ $line == *"ipv4_address:"* ]]; then
+  elif [[ $line == *"ipv4_address:"* ]]; then
     ip=$(echo $line | awk '{print $2}')
     ip_para_container[$ip]=$container
 
@@ -31,22 +31,37 @@ echo "Teste de conectividade entre roteadores"
 echo "======================================="
 
 for origem in "${roteadores[@]}"; do
-  echo -e "\n### Pings a partir do $origem ###"
+  echo -e "\n---- Pings a partir de $origem ----"
   for destino_ip in "${ips[@]}"; do
-    destino_nome="${ip_para_container[$destino_ip]}"
-    [[ "$origem" == "$destino_nome" ]] && continue
-    printf "Pingando %-15s (%-8s)... " "$destino_ip" "$destino_nome"
+    destino="${ip_para_container[$destino_ip]}"
+    [[ "$origem" == "$destino" ]] && continue
+
+    start=$(date +%s.%N)
     if docker exec "$origem" ping -c 1 -W 1 "$destino_ip" &> /dev/null; then
-      echo "1"
+      end=$(date +%s.%N)
+      duracao=$(awk "BEGIN {print $end - $start}")
+      status="1"
       ((success++))
     else
-      echo "0"
+      end=$(date +%s.%N)
+      duracao=$(awk "BEGIN {print $end - $start}")
+      status="0"
       ((fail++))
     fi
+
+    total_time=$(awk "BEGIN {print $total_time + $duracao}")
+    echo "-> $destino (${destino_ip}): ${duracao}s [$status]"
   done
 done
 
+# Resumo
 total=$((success + fail))
-echo -e "\nResumo:"
-echo "Total: $total | Sucesso: $success | Falha: $fail"
-[[ $total -gt 0 ]] && echo "Perda: $((100 * fail / total))%" || echo "Perda: N/A"
+taxa_sucesso=$(awk "BEGIN {printf \"%.2f\", ($success / $total) * 100}")
+taxa_falha=$(awk "BEGIN {printf \"%.2f\", ($fail / $total) * 100}")
+media_global=$(awk "BEGIN {printf \"%.4f\", $total_time / $total}")
+
+echo -e "\n---- Resumo Geral ----"
+echo "Total de testes: $total"
+echo "Sucesso: $success | Percentual: $taxa_sucesso%"
+echo "Falha: $fail | Percentual: $taxa_falha%"
+echo "Média global de tempo: ${media_global}s"
